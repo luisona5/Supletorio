@@ -23,7 +23,7 @@ class CustomTextField extends StatefulWidget {
     this.validator,
     this.prefixIcon,
     this.maxLines = 1,
-    this.enabled = true,
+    this.enabled = true, required String hintText,
   });
 
   @override

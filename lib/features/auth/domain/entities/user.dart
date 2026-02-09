@@ -18,6 +18,7 @@ enum UserType {
   }
 
   /// Convertir a string
+  @override
   String toString() {
     switch (this) {
       case UserType.ciudadano:

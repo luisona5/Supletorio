@@ -4,13 +4,17 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'core/network/supabase_client.dart';
 import 'core/theme/app_theme.dart';
 import 'core/constants/app_constants.dart';
-import 'core/di/injection_container.dart';
+import '../core/di/injection_container.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/bloc/auth_event.dart';
 import 'features/auth/presentation/bloc/auth_state.dart';
 import 'features/auth/presentation/pages/login_page.dart';
 import 'features/auth/domain/entities/user.dart';
 import 'features/shared/widgets/loading_widget.dart';
+import 'features/shared/widgets/splash_screen.dart';
+import 'features/reportes/presentation/pages/ciudadano_home_page.dart';
+import 'features/reportes/presentation/pages/admin_home_page.dart';
+import 'features/reportes/presentation/bloc/reporte_bloc.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,8 +36,15 @@ class ElVeciReportaApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => sl<AuthBloc>()..add(const AuthCheckRequested()),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (_) => sl<AuthBloc>()..add(const AuthCheckRequested()),
+        ),
+        BlocProvider(
+          create: (_) => sl<ReporteBloc>(),
+        ),
+      ],
       child: MaterialApp(
         title: AppStrings.appName,
         debugShowCheckedModeBanner: false,
@@ -52,11 +63,9 @@ class AuthWrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, state) {
-        // Loading
+        // Loading - Mostrar Splash
         if (state is AuthInitial || state is AuthLoading) {
-          return const Scaffold(
-            body: LoadingWidget(message: 'Verificando autenticación...'),
-          );
+          return const SplashScreen();
         }
 
         // Autenticado - Redirigir según rol
@@ -71,9 +80,7 @@ class AuthWrapper extends StatelessWidget {
   }
 }
 
-/// Página temporal según el tipo de usuario
-/// 
-/// Será reemplazada por las páginas reales en la siguiente fase
+/// Página según el tipo de usuario
 class _HomePageForUser extends StatelessWidget {
   final User user;
 
@@ -81,111 +88,11 @@ class _HomePageForUser extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(user.isAdministrador
-            ? 'Panel Administrador'
-            : 'Mis Reportes'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () {
-              context.read<AuthBloc>().add(const LogoutRequested());
-            },
-          ),
-        ],
-      ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                user.isAdministrador
-                    ? Icons.admin_panel_settings
-                    : Icons.person,
-                size: 80,
-                color: AppTheme.primary,
-              ),
-              const SizedBox(height: 20),
-              Text(
-                '¡Bienvenido!',
-                style: Theme.of(context).textTheme.headlineLarge,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                user.fullName,
-                style: Theme.of(context).textTheme.headlineMedium,
-              ),
-              const SizedBox(height: 20),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 10,
-                ),
-                decoration: BoxDecoration(
-                  color: user.isAdministrador
-                      ? AppTheme.secondary.withOpacity(0.1)
-                      : AppTheme.primary.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  user.userType.displayName,
-                  style: TextStyle(
-                    color: user.isAdministrador
-                        ? AppTheme.secondary
-                        : AppTheme.primary,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 40),
-              const Card(
-                child: Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Column(
-                    children: [
-                      Icon(
-                        Icons.construction,
-                        size: 40,
-                        color: AppTheme.warning,
-                      ),
-                      SizedBox(height: 12),
-                      Text(
-                        'Fase 2 Completada ✅',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        'Autenticación y diferenciación de roles funcionando correctamente.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: AppTheme.textGrey,
-                        ),
-                      ),
-                      SizedBox(height: 12),
-                      Text(
-                        'Próximo paso: Implementar sistema de reportes',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: AppTheme.textGrey,
-                          fontStyle: FontStyle.italic,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+    // Redirigir según el rol
+    if (user.isAdministrador) {
+      return const AdminHomePage();
+    } else {
+      return const CiudadanoHomePage();
+    }
   }
 }

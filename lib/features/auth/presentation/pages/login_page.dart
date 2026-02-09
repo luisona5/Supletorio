@@ -111,7 +111,7 @@ class _LoginPageState extends State<LoginPage> {
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
                         prefixIcon: Icons.email_outlined,
-                        validator: Validators.email,
+                        validator: Validators.email, hintText: '',
                       ),
 
                       const SizedBox(height: 20),
@@ -123,7 +123,7 @@ class _LoginPageState extends State<LoginPage> {
                         controller: _passwordController,
                         isPassword: true,
                         prefixIcon: Icons.lock_outline,
-                        validator: Validators.password,
+                        validator: Validators.password, hintText: '',
                       ),
 
                       const SizedBox(height: 24),

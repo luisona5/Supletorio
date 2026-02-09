@@ -178,7 +178,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         hint: 'Juan Pérez',
                         controller: _nameController,
                         prefixIcon: Icons.person_outline,
-                        validator: Validators.fullName,
+                        validator: Validators.fullName, hintText: '',
                       ),
 
                       const SizedBox(height: 20),
@@ -190,7 +190,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
                         prefixIcon: Icons.email_outlined,
-                        validator: Validators.email,
+                        validator: Validators.email, hintText: '',
                       ),
 
                       const SizedBox(height: 20),
@@ -202,7 +202,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         controller: _passwordController,
                         isPassword: true,
                         prefixIcon: Icons.lock_outline,
-                        validator: Validators.password,
+                        validator: Validators.password, hintText: '',
                       ),
 
                       const SizedBox(height: 20),
@@ -222,7 +222,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             return 'Las contraseñas no coinciden';
                           }
                           return null;
-                        },
+                        }, hintText: '',
                       ),
 
                       const SizedBox(height: 32),
