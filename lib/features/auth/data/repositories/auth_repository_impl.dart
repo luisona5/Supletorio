@@ -72,4 +72,14 @@ class AuthRepositoryImpl implements AuthRepository {
       return userModel?.toEntity();
     });
   }
+
+  /// ✅ NUEVO: Reenviar email de confirmación
+  @override
+  Future<void> resendConfirmationEmail(String email) async {
+    try {
+      await dataSource.resendConfirmationEmail(email);
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

@@ -9,6 +9,7 @@ import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/bloc/auth_event.dart';
 import 'features/auth/presentation/bloc/auth_state.dart';
 import 'features/auth/presentation/pages/login_page.dart';
+import 'features/auth/presentation/pages/email_verification_page.dart'; 
 import 'features/auth/domain/entities/user.dart';
 import 'features/shared/widgets/loading_widget.dart';
 import 'features/shared/widgets/splash_screen.dart';
@@ -71,6 +72,16 @@ class AuthWrapper extends StatelessWidget {
         // Autenticado - Redirigir según rol
         if (state is AuthAuthenticated) {
           return _HomePageForUser(user: state.user);
+        }
+
+        // ✅ NUEVO: Email no confirmado
+        if (state is AuthEmailNotConfirmed) {
+          return EmailVerificationPage(email: state.email);
+        }
+
+        // ✅ NUEVO: Email de confirmación enviado
+        if (state is AuthConfirmationEmailSent) {
+          return EmailVerificationPage(email: state.email);
         }
 
         // No autenticado - Ir a Login

@@ -49,6 +49,9 @@ class SupabaseClientManager {
   
   /// ¿Está autenticado?
   bool get isAuthenticated => currentUser != null;
+
+   /// ✅ NUEVO: ¿Email confirmado?
+  bool get isEmailConfirmed => currentUser?.emailConfirmedAt != null;
   
   // ========== HELPERS DE BASE DE DATOS ==========
   

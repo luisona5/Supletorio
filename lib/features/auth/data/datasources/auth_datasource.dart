@@ -1,6 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/network/supabase_client.dart';
 import '../../../../core/constants/app_constants.dart';
+import '../../../../core/exceptions/auth_exceptions.dart';
 import '../models/user_model.dart';
 import '../../domain/entities/user.dart';
 
@@ -15,6 +16,7 @@ abstract class AuthDataSource {
   });
   Future<UserModel?> getCurrentUser();
   Future<void> logout();
+  Future<void> resendConfirmationEmail(String email);
   Stream<UserModel?> get authStateChanges;
 }
 
@@ -34,13 +36,21 @@ class AuthDataSourceImpl implements AuthDataSource {
         throw Exception('Error al iniciar sesión');
       }
 
+      // ✅ NUEVO: Verificar si el email está confirmado
+      if (response.user!.emailConfirmedAt == null) {
+        throw EmailNotConfirmedException(email);
+      }
+
       // Obtener perfil del usuario
       final profile = await _getProfile(response.user!.id);
       return profile;
     } on AuthException catch (e) {
+      if (e.message.contains('Email not confirmed')) {
+        throw EmailNotConfirmedException(email);
+      }
       throw Exception('Error de autenticación: ${e.message}');
     } catch (e) {
-      throw Exception('Error al iniciar sesión: $e');
+      rethrow;
     }
   }
 
@@ -52,7 +62,7 @@ class AuthDataSourceImpl implements AuthDataSource {
     required UserType userType,
   }) async {
     try {
-      // Registrar en Supabase Auth
+      // ✅ NUEVO: Configurar opciones de registro
       final response = await _supabase.auth.signUp(
         email: email,
         password: password,
@@ -60,22 +70,31 @@ class AuthDataSourceImpl implements AuthDataSource {
           'full_name': fullName,
           'user_type': userType.toString(),
         },
+        // ✅ NUEVO: Deep link para confirmación (opcional)
+        emailRedirectTo: 'veciavisa://login-callback',
       );
 
       if (response.user == null) {
         throw Exception('Error al registrarse');
       }
 
-      // Esperar a que el trigger cree el perfil
-      await Future.delayed(const Duration(milliseconds: 1000));
+      // ✅ NUEVO: Verificar si requiere confirmación
+      if (response.user!.emailConfirmedAt == null) {
+        print('⚠️ Email pendiente de confirmación: $email');
+        throw EmailNotConfirmedException(email);
+      }
 
-      // Obtener perfil creado por el trigger
+      // Si no requiere confirmación, continuar normalmente
+      await Future.delayed(const Duration(milliseconds: 1000));
       final profile = await _getProfile(response.user!.id);
       return profile;
     } on AuthException catch (e) {
+      if (e.message.contains('User already registered')) {
+        throw UserAlreadyExistsException();
+      }
       throw Exception('Error de registro: ${e.message}');
     } catch (e) {
-      throw Exception('Error al registrarse: $e');
+      rethrow;
     }
   }
 
@@ -84,6 +103,12 @@ class AuthDataSourceImpl implements AuthDataSource {
     try {
       final user = _supabase.auth.currentUser;
       if (user == null) return null;
+
+      // ✅ NUEVO: Verificar confirmación de email
+      if (user.emailConfirmedAt == null) {
+        print('⚠️ Usuario con email no confirmado: ${user.email}');
+        return null;
+      }
 
       return await _getProfile(user.id);
     } catch (e) {
@@ -101,11 +126,33 @@ class AuthDataSourceImpl implements AuthDataSource {
     }
   }
 
+  /// ✅ NUEVO: Reenviar email de confirmación
+  @override
+  Future<void> resendConfirmationEmail(String email) async {
+    try {
+      await _supabase.auth.resend(
+        type: OtpType.signup,
+        email: email,
+      );
+      print('✅ Email de confirmación reenviado a: $email');
+    } on AuthException catch (e) {
+      throw Exception('Error reenviando email: ${e.message}');
+    } catch (e) {
+      throw Exception('Error reenviando email: $e');
+    }
+  }
+
   @override
   Stream<UserModel?> get authStateChanges {
     return _supabase.auth.onAuthStateChange.asyncMap((data) async {
       final user = data.session?.user;
       if (user == null) return null;
+
+      // ✅ NUEVO: Verificar confirmación
+      if (user.emailConfirmedAt == null) {
+        print('⚠️ Usuario sin confirmar en stream: ${user.email}');
+        return null;
+      }
 
       try {
         return await _getProfile(user.id);

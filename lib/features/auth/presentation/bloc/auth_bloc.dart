@@ -1,30 +1,33 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/exceptions/auth_exceptions.dart';
 import '../../domain/usecases/login_usecase.dart';
 import '../../domain/usecases/register_usecase.dart';
 import '../../domain/usecases/logout_usecase.dart';
+import '../../domain/usecases/resend_confirmation_email_usecase.dart';
 import '../../domain/repositories/auth_repository.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
 
 /// Bloc de Autenticación
-/// 
-/// Maneja los estados de autenticación de la aplicación
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final LoginUseCase loginUseCase;
   final RegisterUseCase registerUseCase;
   final LogoutUseCase logoutUseCase;
+  final ResendConfirmationEmailUseCase resendConfirmationEmailUseCase;
   final AuthRepository authRepository;
 
   AuthBloc({
     required this.loginUseCase,
     required this.registerUseCase,
     required this.logoutUseCase,
+    required this.resendConfirmationEmailUseCase,
     required this.authRepository,
   }) : super(const AuthInitial()) {
     on<AuthCheckRequested>(_onAuthCheckRequested);
     on<LoginRequested>(_onLoginRequested);
     on<RegisterRequested>(_onRegisterRequested);
     on<LogoutRequested>(_onLogoutRequested);
+    on<ResendConfirmationEmailRequested>(_onResendConfirmationEmail);
 
     // Escuchar cambios de autenticación
     _listenAuthChanges();
@@ -64,6 +67,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       );
 
       emit(AuthAuthenticated(user));
+    } on EmailNotConfirmedException catch (e) {
+      // ✅ NUEVO: Manejar email no confirmado
+      emit(AuthEmailNotConfirmed(e.email));
     } catch (e) {
       emit(AuthError(_parseError(e)));
     }
@@ -85,6 +91,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       );
 
       emit(AuthAuthenticated(user));
+    } on EmailNotConfirmedException catch (e) {
+      // ✅ NUEVO: Manejar email no confirmado
+      emit(AuthEmailNotConfirmed(e.email));
+    } on UserAlreadyExistsException {
+      emit(const AuthError('Este email ya está registrado'));
     } catch (e) {
       emit(AuthError(_parseError(e)));
     }
@@ -100,6 +111,26 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(const AuthUnauthenticated());
     } catch (e) {
       emit(AuthError(_parseError(e)));
+    }
+  }
+
+  /// ✅ NUEVO: Manejar reenvío de email
+  Future<void> _onResendConfirmationEmail(
+    ResendConfirmationEmailRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    try {
+      await resendConfirmationEmailUseCase(event.email);
+      emit(AuthConfirmationEmailSent(event.email));
+      
+      // Volver al estado de email no confirmado después de 2 segundos
+      await Future.delayed(const Duration(seconds: 2));
+      emit(AuthEmailNotConfirmed(event.email));
+    } catch (e) {
+      emit(AuthError(_parseError(e)));
+      // Volver al estado anterior
+      await Future.delayed(const Duration(seconds: 2));
+      emit(AuthEmailNotConfirmed(event.email));
     }
   }
 

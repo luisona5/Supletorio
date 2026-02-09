@@ -29,4 +29,7 @@ abstract class AuthRepository {
 
   /// Stream de cambios de autenticación
   Stream<User?> get authStateChanges;
+
+   /// Reenviar email de confirmación
+  Future<void> resendConfirmationEmail(String email);
 }

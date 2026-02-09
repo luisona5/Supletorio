@@ -50,3 +50,13 @@ class RegisterRequested extends AuthEvent {
 class LogoutRequested extends AuthEvent {
   const LogoutRequested();
 }
+
+/// ✅ NUEVO: Reenviar email de confirmación
+class ResendConfirmationEmailRequested extends AuthEvent {
+  final String email;
+
+  const ResendConfirmationEmailRequested(this.email);
+
+  @override
+  List<Object?> get props => [email];
+}

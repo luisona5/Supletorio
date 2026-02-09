@@ -7,6 +7,7 @@ import '../../features/auth/domain/repositories/auth_repository.dart';
 import '../../features/auth/domain/usecases/login_usecase.dart';
 import '../../features/auth/domain/usecases/register_usecase.dart';
 import '../../features/auth/domain/usecases/logout_usecase.dart';
+import '../../features/auth/domain/usecases/resend_confirmation_email_usecase.dart'; // ✅ NUEVO
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
 
 // Reportes
@@ -30,6 +31,7 @@ Future<void> initializeDependencies() async {
       loginUseCase: sl(),
       registerUseCase: sl(),
       logoutUseCase: sl(),
+      resendConfirmationEmailUseCase: sl(), // ✅ NUEVO
       authRepository: sl(),
     ),
   );
@@ -38,6 +40,7 @@ Future<void> initializeDependencies() async {
   sl.registerLazySingleton(() => LoginUseCase(sl()));
   sl.registerLazySingleton(() => RegisterUseCase(sl()));
   sl.registerLazySingleton(() => LogoutUseCase(sl()));
+  sl.registerLazySingleton(() => ResendConfirmationEmailUseCase(sl())); // ✅ NUEVO
 
   // ========== AUTH - REPOSITORIES ==========
   sl.registerLazySingleton<AuthRepository>(

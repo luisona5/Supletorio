@@ -34,6 +34,26 @@ class AuthUnauthenticated extends AuthState {
   const AuthUnauthenticated();
 }
 
+/// ✅ NUEVO: Email pendiente de confirmación
+class AuthEmailNotConfirmed extends AuthState {
+  final String email;
+
+  const AuthEmailNotConfirmed(this.email);
+
+  @override
+  List<Object?> get props => [email];
+}
+
+/// ✅ NUEVO: Email de confirmación enviado
+class AuthConfirmationEmailSent extends AuthState {
+  final String email;
+
+  const AuthConfirmationEmailSent(this.email);
+
+  @override
+  List<Object?> get props => [email];
+}
+
 /// Error de autenticación
 class AuthError extends AuthState {
   final String message;
