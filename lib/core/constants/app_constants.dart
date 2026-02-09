@@ -36,7 +36,7 @@ class AppConstants {
 /// Strings de la UI
 class AppStrings {
   // Auth
-  static const String appName = 'ElVeciReporta';
+  static const String appName = 'VeciAvisa';
   static const String welcome = 'Bienvenido';
   static const String loginToContinue = 'Inicia sesión para continuar';
   static const String email = 'EMAIL';

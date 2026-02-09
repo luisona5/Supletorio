@@ -72,19 +72,27 @@ class _LoginPageState extends State<LoginPage> {
                     children: [
                       const SizedBox(height: 40),
 
-                      // Logo
+                      // Logo - SOLO CAMBIÉ ESTA PARTE
                       Container(
-                        height: 100,
-                        decoration: const BoxDecoration(
-                          color: AppTheme.primary,
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.report_problem,
-                          size: 60,
-                          color: Colors.white,
+                      height: 100,
+                      decoration: const BoxDecoration(
+                        color: AppTheme.primary,
+                        shape: BoxShape.circle,
+                      ),
+                      child: ClipOval(
+                        child: Image.asset(
+                          'assets/images/quito.jpg',
+                          fit: BoxFit.contain, // Cambiado de cover a contain para ver la imagen completa
+                          errorBuilder: (context, error, stackTrace) {
+                            return const Icon(
+                              Icons.location_city, // Icono más apropiado para un escudo de ciudad
+                              size: 60,
+                              color: Colors.white,
+                            );
+                          },
                         ),
                       ),
+                    ),
 
                       const SizedBox(height: 32),
 

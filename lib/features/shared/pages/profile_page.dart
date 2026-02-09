@@ -269,7 +269,7 @@ class ProfilePage extends StatelessWidget {
   void _showAboutDialog(BuildContext context) {
     showAboutDialog(
       context: context,
-      applicationName: 'ElVeciReporta',
+      applicationName: 'VeciAvisa',
       applicationVersion: '1.0.0',
       applicationIcon: const Icon(
         Icons.report_problem,

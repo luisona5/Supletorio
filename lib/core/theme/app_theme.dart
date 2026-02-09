@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-/// Tema visual de ElVeciReporta
+/// Tema visual de ElVeciavisa
 class AppTheme {
   // ========== COLORES PRINCIPALES ==========
   static const Color primary = Color(0xFF1976D2); // Azul municipio
