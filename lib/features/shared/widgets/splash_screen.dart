@@ -203,15 +203,14 @@ class _SplashScreenState extends State<SplashScreen>
                                     ),
                                   ),
                                   
-                                  // Icono principal
+                                  // logo de Quito con efecto de recorte circular
                                   Center(
-                                    child: Icon(
-                                      Icons.report_problem,
-                                      size: 70,
-                                      color: AppTheme.primary,
+                                    child: Image.asset(
+                                      'assets/images/quito.jpg',
+                                      width: 70, // Ajusta el tamaño según necesites
+                                      height: 70,
                                     ),
                                   ),
-                                  
                                   // Anillo exterior animado
                                   Transform.scale(
                                     scale: 1.1 + 0.1 * sin (_controller.value * 3.14159 * 2),
